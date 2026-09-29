@@ -208,6 +208,17 @@ def slot_grid(machine,times,day,prefix,suggested=None,booked_set=None):
 
 for k,v in {'page':'home','day':None,'washer':None,'wash_time':None,'dryer':None,'dry_time':None,'name':'','student_id':'','logged_in':False}.items(): st.session_state.setdefault(k,v)
 
+# Calendar date links perform a browser navigation. Restore this lightweight
+# prototype login from the query string before the login gate runs.
+_q_name = st.query_params.get('u_name')
+_q_sid = st.query_params.get('u_sid')
+_q_pick = st.query_params.get('pick')
+if _q_pick and _q_name and _q_sid and not st.session_state.logged_in:
+    st.session_state.name = _q_name
+    st.session_state.student_id = _q_sid.upper()
+    st.session_state.logged_in = True
+    st.session_state.page = 'date'
+
 if not st.session_state.logged_in:
     heading('Laundry Machine Booking','Shared laundry booking prototype')
     name=st.text_input('Name',placeholder='e.g. Tina')
@@ -320,7 +331,7 @@ elif page=='date':
                 elif not(window_start<=day_item<=window_end) or kd in unavailable:
                     html+=f'<div class="laundry-cal-day laundry-cal-disabled">{day_item.day}</div>'
                 else:
-                    html+=f'<a class="laundry-cal-day laundry-cal-available laundry-cal-link" href="?pick={kd}" target="_self">{day_item.day}</a>'
+                    html+=f'<a class="laundry-cal-day laundry-cal-available laundry-cal-link" href="?pick={kd}&u_name={urllib.parse.quote(USER)}&u_sid={urllib.parse.quote(student_id())}" target="_self">{day_item.day}</a>'
             html+='</div>'
         st.markdown(html,unsafe_allow_html=True)
 
