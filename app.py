@@ -193,7 +193,7 @@ div[data-testid="stHorizontalBlock"]:has(.reservation-cancel-marker){
     flex-wrap:nowrap !important;
     align-items:flex-start !important;
     gap:8px !important;
-    margin-bottom:12px !important;
+    margin-bottom:0 !important;
 }
 div[data-testid="stHorizontalBlock"]:has(.reservation-cancel-marker) > div[data-testid="stColumn"]:first-child{
     flex:1 1 auto !important;
@@ -222,6 +222,10 @@ div[data-testid="stColumn"]:has(.reservation-cancel-marker) button{
 div[data-testid="stColumn"]:has(.reservation-cancel-marker) div[data-testid="stButton"]{
     transform: translateY(-7px) !important;
 }
+
+/* Group washer + dryer from the same date */
+.reservation-gap.same-day{height:3px}
+.reservation-gap.new-day{height:18px}
 </style>
 """, unsafe_allow_html=True)
 
@@ -553,7 +557,7 @@ elif page=='reservations':
     if not rows:
         st.info('No upcoming reservations yet.')
 
-    for r in rows:
+    for row_index, r in enumerate(rows):
         rid = r['id']
         m = r['machine']
         typ = r['machine_type']
@@ -579,6 +583,17 @@ elif page=='reservations':
                 }
             )
             st.rerun()
+
+        # Keep Washer + Dryer bookings from the same day visually grouped.
+        next_same_day = (
+            row_index < len(rows) - 1
+            and str(rows[row_index + 1].get('day',''))[:10] == str(r.get('day',''))[:10]
+        )
+        st.markdown(
+            '<div class="reservation-gap same-day"></div>' if next_same_day
+            else '<div class="reservation-gap new-day"></div>',
+            unsafe_allow_html=True
+        )
 
 elif page=='issue':
     back('Back','home'); heading('Report an Issue','Tell us what went wrong in the laundry room.')
