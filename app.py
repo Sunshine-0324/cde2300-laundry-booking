@@ -147,6 +147,11 @@ def nav(p):
 
 def back(label,p):
     if st.button(f'‹  {label}',key=f'back-{p}'):
+        # Calendar date selection uses query parameters to survive the browser
+        # navigation. Clear them before going back so an old `pick` value
+        # cannot immediately redirect the user forward again.
+        if p == 'date':
+            st.query_params.clear()
         nav(p)
 
 def heading(title,sub=None):
