@@ -223,11 +223,6 @@ div[data-testid="stColumn"]:has(.reservation-cancel-marker) div[data-testid="stB
     transform: translateY(-7px) !important;
 }
 
-/* Same-day Washer + Dryer are one compact visual group */
-.reservation-card-stack{display:flex;flex-direction:column;gap:4px}
-.reservation-card-stack svg{display:block}
-div[data-testid="stColumn"]:has(.reservation-cancel-marker) div[data-testid="stVerticalBlock"]{gap:4px !important}
-.reservation-day-gap{height:14px}
 </style>
 """, unsafe_allow_html=True)
 
@@ -558,37 +553,27 @@ elif page=='reservations':
     if not rows:
         st.info('No upcoming reservations yet.')
 
-    # Render each date as ONE Streamlit row so same-day Washer + Dryer stay together.
-    grouped = {}
     for r in rows:
-        grouped.setdefault(str(r.get('day',''))[:10], []).append(r)
+        rid = r['id']
+        m = r['machine']
+        typ = r['machine_type']
+        d = r['day']
+        t = str(r['start_time'])[:5]
+        icon = '▣' if typ == 'Washer' else '♨'
+        date_text = datetime.fromisoformat(d).strftime("%d %b %Y")
 
-    for day_key, day_rows in grouped.items():
         c1, c2 = st.columns([8.5, 1.5], gap="small")
-        cards = []
-        for r in day_rows:
-            m = r['machine']
-            typ = r['machine_type']
-            d = r['day']
-            t = str(r['start_time'])[:5]
-            icon = '▣' if typ == 'Washer' else '♨'
-            date_text = datetime.fromisoformat(d).strftime("%d %b %Y")
-            cards.append(f"""<svg viewBox="0 0 500 64" width="100%" height="64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{m}, {date_text}, {t}"><rect x="1" y="1" width="498" height="62" rx="12" fill="#ffffff" stroke="#e4e7ec" stroke-width="1.5"/><text x="18" y="25" fill="#111111" font-size="15" font-weight="800" font-family="Arial, sans-serif">{icon}  {m}</text><text x="18" y="49" fill="#4b5563" font-size="11" font-weight="600" font-family="Arial, sans-serif">{date_text}</text><rect x="410" y="34" width="70" height="22" rx="8" fill="#dffbf5"/><text x="445" y="49" text-anchor="middle" fill="#007f6d" font-size="11" font-weight="800" font-family="Arial, sans-serif">{t}</text></svg>""")
-
-        c1.markdown('<div class="reservation-card-stack">' + ''.join(cards) + '</div>', unsafe_allow_html=True)
+        card_svg = f"""<svg viewBox="0 0 500 64" width="100%" height="64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{m}, {date_text}, {t}"><rect x="1" y="1" width="498" height="62" rx="12" fill="#ffffff" stroke="#e4e7ec" stroke-width="1.5"/><text x="18" y="25" fill="#111111" font-size="15" font-weight="800" font-family="Arial, sans-serif">{icon}  {m}</text><text x="18" y="49" fill="#4b5563" font-size="11" font-weight="600" font-family="Arial, sans-serif">{date_text}</text><rect x="410" y="34" width="70" height="22" rx="8" fill="#dffbf5"/><text x="445" y="49" text-anchor="middle" fill="#007f6d" font-size="11" font-weight="800" font-family="Arial, sans-serif">{t}</text></svg>"""
+        c1.markdown(card_svg, unsafe_allow_html=True)
         c2.markdown('<div class="reservation-cancel-marker"></div>', unsafe_allow_html=True)
 
-        for r in day_rows:
-            rid = r['id']
-            if c2.button('✕', key=f'cancel-{rid}', help='Cancel reservation', use_container_width=True):
-                rest_delete('reservations', {
-                    'id': f'eq.{rid}',
-                    'student_id': f'eq.{student_id()}',
-                    'user_name': f'eq.{USER}'
-                })
-                st.rerun()
-
-        st.markdown('<div class="reservation-day-gap"></div>', unsafe_allow_html=True)
+        if c2.button('✕', key=f'cancel-{rid}', help='Cancel reservation', use_container_width=True):
+            rest_delete('reservations', {
+                'id': f'eq.{rid}',
+                'student_id': f'eq.{student_id()}',
+                'user_name': f'eq.{USER}'
+            })
+            st.rerun()
 
 elif page=='issue':
     back('Back','home'); heading('Report an Issue','Tell us what went wrong in the laundry room.')
