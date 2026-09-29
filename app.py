@@ -153,9 +153,9 @@ div[data-testid="stColumn"]:has(.reservation-cancel-marker) div[data-testid="stB
     margin:0 !important;
 }
 div[data-testid="stColumn"]:has(.reservation-cancel-marker) button {
-    width:64px !important;
-    height:64px !important;
-    min-height:64px !important;
+    width:46px !important;
+    height:46px !important;
+    min-height:46px !important;
     padding:0 !important;
     border-radius:12px !important;
     background:#ff4b4b !important;
@@ -181,39 +181,41 @@ div[data-testid="stColumn"]:has(.reservation-cancel-marker) button:hover {
         min-width:0 !important;
     }
     div[data-testid="stHorizontalBlock"]:has(.reservation-cancel-marker) > div[data-testid="stColumn"]:last-child {
-        flex:0 0 64px !important;
-        width:64px !important;
-        min-width:64px !important;
+        flex:0 0 46px !important;
+        width:46px !important;
+        min-width:46px !important;
     }
 }
 
-/* Exact visual alignment for My Reservations rows */
-div[data-testid="stHorizontalBlock"]:has(.reservation-cancel-marker) {
+
+/* Final My Reservations alignment: match cancel square to the visible card */
+div[data-testid="stHorizontalBlock"]:has(.reservation-cancel-marker){
+    flex-wrap:nowrap !important;
     align-items:flex-start !important;
-    min-height:64px !important;
-    margin-bottom:14px !important;
+    gap:8px !important;
+    margin-bottom:12px !important;
 }
-div[data-testid="stHorizontalBlock"]:has(.reservation-cancel-marker) > div[data-testid="stColumn"] {
-    height:64px !important;
+div[data-testid="stHorizontalBlock"]:has(.reservation-cancel-marker) > div[data-testid="stColumn"]:first-child{
+    flex:1 1 auto !important;
+    width:auto !important;
+    min-width:0 !important;
 }
-div[data-testid="stHorizontalBlock"]:has(.reservation-cancel-marker) div[data-testid="stMarkdownContainer"] {
-    margin:0 !important;
+div[data-testid="stHorizontalBlock"]:has(.reservation-cancel-marker) > div[data-testid="stColumn"]:last-child{
+    flex:0 0 46px !important;
+    width:46px !important;
+    min-width:46px !important;
+}
+div[data-testid="stColumn"]:has(.reservation-cancel-marker) button{
+    width:46px !important;
+    height:46px !important;
+    min-height:46px !important;
     padding:0 !important;
-}
-div[data-testid="stHorizontalBlock"]:has(.reservation-cancel-marker) div[data-testid="stMarkdownContainer"] > p {
-    margin:0 !important;
-    padding:0 !important;
-    line-height:0 !important;
-}
-div[data-testid="stHorizontalBlock"]:has(.reservation-cancel-marker) svg {
-    display:block !important;
-    height:64px !important;
-}
-div[data-testid="stColumn"]:has(.reservation-cancel-marker) div[data-testid="stButton"],
-div[data-testid="stColumn"]:has(.reservation-cancel-marker) div[data-testid="stButton"] > button {
-    height:64px !important;
-    min-height:64px !important;
-    margin:0 !important;
+    border-radius:11px !important;
+    background:#ff4b4b !important;
+    border:1px solid #ff4b4b !important;
+    color:white !important;
+    font-size:16px !important;
+    line-height:1 !important;
 }
 </style>
 """, unsafe_allow_html=True)
