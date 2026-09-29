@@ -217,6 +217,11 @@ div[data-testid="stColumn"]:has(.reservation-cancel-marker) button{
     font-size:16px !important;
     line-height:1 !important;
 }
+
+/* Align the red cancel square vertically with the reservation card */
+div[data-testid="stColumn"]:has(.reservation-cancel-marker) div[data-testid="stButton"]{
+    transform: translateY(-7px) !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
