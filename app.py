@@ -109,6 +109,12 @@ div[data-testid="stTextInput"] label p {
     opacity: 1 !important;
     font-weight: 700 !important;
 }
+
+/* Mobile-safe seven-column calendar */
+.laundry-cal-head,.laundry-cal-week{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important;gap:3px!important;width:100%!important}
+.laundry-cal-head div{text-align:center;color:#667085;font-size:12px;font-weight:700;padding:4px 0}
+.laundry-cal-day{min-height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.laundry-cal-empty{min-height:40px}.laundry-cal-disabled{background:#f0f1f4;color:#a8adb7}.laundry-cal-mine{background:#dff7df;border:1px solid #9bd49b;color:#176b2c;font-weight:800}
 </style>
 """, unsafe_allow_html=True)
 
@@ -228,7 +234,6 @@ elif page=='date':
 
     my_bookings = user_rows()
     my_dates = {str(r.get('day',''))[:10] for r in my_bookings}
-
     my_week_dates = {}
     for r in my_bookings:
         try:
@@ -239,99 +244,59 @@ elif page=='date':
             pass
 
     def day_has_pair_capacity(check_day):
-        rows = rest_get("reservations", {
-            "select": "machine,machine_type,start_time",
-            "day": f"eq.{check_day.isoformat()}",
-        })
-        if not isinstance(rows, list):
-            rows = []
+        rows = rest_get("reservations", {"select":"machine,machine_type,start_time","day":f"eq.{check_day.isoformat()}"})
+        if not isinstance(rows, list): rows = []
         occupied = {(str(r.get("machine")), str(r.get("start_time"))[:5]) for r in rows}
-        washer_available = any((m, t) not in occupied for m in MACHINES['Washer'] for t in WASH_TIMES)
-        dryer_available = any((m, t) not in occupied for m in MACHINES['Dryer'] for t in DRY_TIMES)
-        return washer_available and dryer_available
+        return (
+            any((m,t) not in occupied for m in MACHINES['Washer'] for t in WASH_TIMES)
+            and any((m,t) not in occupied for m in MACHINES['Dryer'] for t in DRY_TIMES)
+        )
 
-    # Rolling two-week booking window: today + the following 13 days.
     window_start = date.today()
     window_end = window_start + timedelta(days=13)
     window_days = [window_start + timedelta(days=i) for i in range(14)]
-
     unavailable = set()
-    full_dates = set()
-    weekly_blocked = set()
-
     for check_day in window_days:
         iso = check_day.isocalendar()
-        week_key = (iso.year, iso.week)
-        own_booking = check_day.isoformat() in my_dates
-        week_limit = len(my_week_dates.get(week_key, set())) >= 2
-        full_day = not day_has_pair_capacity(check_day)
-
-        if week_limit:
-            weekly_blocked.add(check_day.isoformat())
-        if full_day:
-            full_dates.add(check_day.isoformat())
-        if own_booking or week_limit or full_day:
+        week_limit = len(my_week_dates.get((iso.year,iso.week),set())) >= 2
+        if check_day.isoformat() in my_dates or week_limit or not day_has_pair_capacity(check_day):
             unavailable.add(check_day.isoformat())
 
-    # Calendar-style month grid. Unlike st.date_input, these individual
-    # date buttons can actually be disabled and booked dates can be marked.
     import calendar
+    cal = calendar.Calendar(firstweekday=6)
     months = []
     cursor = date(window_start.year, window_start.month, 1)
-    end_month = (window_end.year, window_end.month)
-    while (cursor.year, cursor.month) <= end_month:
-        months.append((cursor.year, cursor.month))
-        if cursor.month == 12:
-            cursor = date(cursor.year + 1, 1, 1)
-        else:
-            cursor = date(cursor.year, cursor.month + 1, 1)
+    while (cursor.year,cursor.month) <= (window_end.year,window_end.month):
+        months.append((cursor.year,cursor.month))
+        cursor = date(cursor.year+1,1,1) if cursor.month==12 else date(cursor.year,cursor.month+1,1)
 
-    selected = None
-    cal = calendar.Calendar(firstweekday=6)  # Sunday first
-
-    for year, month in months:
-        st.markdown(f'<div style="font-size:17px;font-weight:800;color:#111827;margin:14px 0 8px">{calendar.month_name[month]} {year}</div>', unsafe_allow_html=True)
-
-        headers = st.columns(7)
-        for col, label in zip(headers, ['Su','Mo','Tu','We','Th','Fr','Sa']):
-            col.markdown(f'<div style="text-align:center;color:#667085;font-size:12px;font-weight:700">{label}</div>', unsafe_allow_html=True)
-
-        for week in cal.monthdatescalendar(year, month):
-            cols = st.columns(7)
-            for idx, day_item in enumerate(week):
-                in_month = day_item.month == month
-                in_window = window_start <= day_item <= window_end
-                key_date = day_item.isoformat()
-                is_mine = key_date in my_dates
-                is_unavailable = key_date in unavailable
-
-                if not in_month:
-                    cols[idx].markdown('<div style="height:38px"></div>', unsafe_allow_html=True)
-                    continue
-
-                # Mark the user's own reservation directly in the calendar.
-                label = f'✓ {day_item.day}' if is_mine else str(day_item.day)
-
-                # Give the user's booked dates a light-green calendar cell.
-                if is_mine:
-                    cols[idx].markdown(
-                        f'''<div style="height:38px;border-radius:9px;background:#dff7df;border:1px solid #9bd49b;color:#176b2c;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;">✓ {day_item.day}</div>''',
-                        unsafe_allow_html=True
-                    )
+    for year,month in months:
+        st.markdown(f'<div style="font-size:17px;font-weight:800;color:#111827;margin:14px 0 8px">{calendar.month_name[month]} {year}</div>',unsafe_allow_html=True)
+        html='<div class="laundry-cal-head">'+''.join(f'<div>{x}</div>' for x in ['Su','Mo','Tu','We','Th','Fr','Sa'])+'</div>'
+        for week in cal.monthdatescalendar(year,month):
+            html+='<div class="laundry-cal-week">'
+            for day_item in week:
+                kd=day_item.isoformat()
+                if day_item.month!=month:
+                    html+='<div class="laundry-cal-empty"></div>'
+                elif kd in my_dates:
+                    html+=f'<div class="laundry-cal-day laundry-cal-mine">✓ {day_item.day}</div>'
+                elif not(window_start<=day_item<=window_end) or kd in unavailable:
+                    html+=f'<div class="laundry-cal-day laundry-cal-disabled">{day_item.day}</div>'
                 else:
-                    if cols[idx].button(
-                        label,
-                        key=f'cal-{key_date}',
-                        disabled=(not in_window) or is_unavailable,
-                        use_container_width=True
-                    ):
-                        selected = day_item
+                    html+=f'<div class="laundry-cal-day">{day_item.day}</div>'
+            html+='</div>'
+        st.markdown(html,unsafe_allow_html=True)
 
-    st.markdown('<div style="margin-top:10px;color:#667085;font-size:12px"><b>✓</b> Your reservation &nbsp; · &nbsp; Disabled dates cannot be booked.</div>', unsafe_allow_html=True)
-
-    if selected is not None:
-        st.session_state.day = selected
-        nav('washer')
+    st.markdown('<div style="margin-top:8px;color:#667085;font-size:12px"><b>✓</b> Your reservation · Grey dates are unavailable.</div>',unsafe_allow_html=True)
+    available_days=[d for d in window_days if d.isoformat() not in unavailable]
+    if available_days:
+        selected=st.selectbox('Select an available date',available_days,format_func=lambda x:x.strftime('%a, %d %b %Y'))
+        if st.button('Continue',use_container_width=True,type='primary'):
+            st.session_state.day=selected
+            nav('washer')
+    else:
+        st.info('There are no available booking dates within the next 2 weeks.')
 
 elif page=='washer':
     back('Back','date'); heading('Select a Washer',st.session_state.day.strftime('%A, %d %B %Y'))
