@@ -135,6 +135,9 @@ div[data-testid="stTextInput"] label p {
         padding: 0 !important;
     }
 }
+
+.laundry-cal-link{text-decoration:none!important;box-sizing:border-box;cursor:pointer}
+.laundry-cal-link:hover{background:#fff5f5!important}
 </style>
 """, unsafe_allow_html=True)
 
@@ -283,6 +286,7 @@ elif page=='date':
             unavailable.add(check_day.isoformat())
 
     import calendar
+    import urllib.parse
     cal = calendar.Calendar(firstweekday=6)
     months = []
     cursor = date(window_start.year, window_start.month, 1)
@@ -290,37 +294,35 @@ elif page=='date':
         months.append((cursor.year,cursor.month))
         cursor = date(cursor.year+1,1,1) if cursor.month==12 else date(cursor.year,cursor.month+1,1)
 
-    # Render the calendar with real Streamlit buttons so available dates can
-    # be selected directly on both desktop and mobile.
+    # Read a directly-clicked date from the URL query string.
+    picked = st.query_params.get("pick")
+    if picked:
+        try:
+            picked_day = date.fromisoformat(picked)
+            if window_start <= picked_day <= window_end and picked not in unavailable:
+                st.query_params.clear()
+                st.session_state.day = picked_day
+                nav('washer')
+        except Exception:
+            st.query_params.clear()
+
     for year,month in months:
         st.markdown(f'<div style="font-size:17px;font-weight:800;color:#111827;margin:14px 0 8px">{calendar.month_name[month]} {year}</div>',unsafe_allow_html=True)
-        st.markdown('<div class="laundry-cal-head">'+''.join(f'<div>{x}</div>' for x in ['Su','Mo','Tu','We','Th','Fr','Sa'])+'</div>',unsafe_allow_html=True)
-
-        for week_no, week in enumerate(cal.monthdatescalendar(year,month)):
-            cols = st.columns(7, gap="small")
-            for idx, day_item in enumerate(week):
-                kd = day_item.isoformat()
-                if day_item.month != month:
-                    cols[idx].markdown('<div style="height:38px"></div>', unsafe_allow_html=True)
+        html='<div class="laundry-cal-head">'+''.join(f'<div>{x}</div>' for x in ['Su','Mo','Tu','We','Th','Fr','Sa'])+'</div>'
+        for week in cal.monthdatescalendar(year,month):
+            html+='<div class="laundry-cal-week">'
+            for day_item in week:
+                kd=day_item.isoformat()
+                if day_item.month!=month:
+                    html+='<div class="laundry-cal-empty"></div>'
                 elif kd in my_dates:
-                    cols[idx].markdown(
-                        f'<div class="laundry-cal-day laundry-cal-mine">✓ {day_item.day}</div>',
-                        unsafe_allow_html=True
-                    )
-                elif not(window_start <= day_item <= window_end) or kd in unavailable:
-                    cols[idx].markdown(
-                        f'<div class="laundry-cal-day laundry-cal-disabled">{day_item.day}</div>',
-                        unsafe_allow_html=True
-                    )
+                    html+=f'<div class="laundry-cal-day laundry-cal-mine">✓ {day_item.day}</div>'
+                elif not(window_start<=day_item<=window_end) or kd in unavailable:
+                    html+=f'<div class="laundry-cal-day laundry-cal-disabled">{day_item.day}</div>'
                 else:
-                    if cols[idx].button(
-                        str(day_item.day),
-                        key=f"date-pick-{kd}",
-                        use_container_width=True,
-                        type="secondary"
-                    ):
-                        st.session_state.day = day_item
-                        nav('washer')
+                    html+=f'<a class="laundry-cal-day laundry-cal-available laundry-cal-link" href="?pick={kd}" target="_self">{day_item.day}</a>'
+            html+='</div>'
+        st.markdown(html,unsafe_allow_html=True)
 
     st.markdown('<div style="margin-top:8px;color:#667085;font-size:12px"><b>✓</b> Your reservation · Grey dates are unavailable · Outlined dates are selectable.</div>',unsafe_allow_html=True)
 
