@@ -139,15 +139,23 @@ div[data-testid="stTextInput"] label p {
 .laundry-cal-link{text-decoration:none!important;box-sizing:border-box;cursor:pointer}
 .laundry-cal-link:hover{background:#fff5f5!important}
 
-/* Square cancel button beside each reservation card */
-div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"]:last-child button {
-    aspect-ratio: 1 / 1 !important;
-    width: 100% !important;
-    min-height: 0 !important;
+/* Compact red cancel button beside reservation cards */
+button[aria-label="Cancel reservation"] {
+    width: 72px !important;
+    height: 72px !important;
+    min-height: 72px !important;
     padding: 0 !important;
     border-radius: 14px !important;
+    background: #ff4b4b !important;
+    border: 1px solid #ff4b4b !important;
+    color: #ffffff !important;
     font-size: 22px !important;
     font-weight: 700 !important;
+}
+button[aria-label="Cancel reservation"]:hover {
+    background: #e94242 !important;
+    border-color: #e94242 !important;
+    color: #ffffff !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -491,8 +499,8 @@ elif page=='reservations':
 
         # Keep each reservation on one row: card on the left, square cancel
         # button on the right. The ratio remains compact on mobile.
-        c1, c2 = st.columns([5.2, 1], gap="small")
-        card_svg = f"""<svg viewBox="0 0 410 96" width="100%" height="96" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{m}, {date_text}, {t}"><rect x="1" y="1" width="408" height="94" rx="16" fill="#ffffff" stroke="#e4e7ec" stroke-width="1.5"/><text x="20" y="34" fill="#111111" font-size="17" font-weight="800" font-family="Arial, sans-serif">{icon}  {m}</text><text x="20" y="70" fill="#4b5563" font-size="13" font-weight="600" font-family="Arial, sans-serif">{date_text}</text><rect x="316" y="49" width="72" height="32" rx="10" fill="#dffbf5"/><text x="352" y="70" text-anchor="middle" fill="#007f6d" font-size="13" font-weight="800" font-family="Arial, sans-serif">{t}</text></svg>"""
+        c1, c2 = st.columns([5.5, 1], gap="small")
+        card_svg = f"""<svg viewBox="0 0 410 72" width="100%" height="72" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{m}, {date_text}, {t}"><rect x="1" y="1" width="408" height="70" rx="14" fill="#ffffff" stroke="#e4e7ec" stroke-width="1.5"/><text x="18" y="28" fill="#111111" font-size="16" font-weight="800" font-family="Arial, sans-serif">{icon}  {m}</text><text x="18" y="55" fill="#4b5563" font-size="12" font-weight="600" font-family="Arial, sans-serif">{date_text}</text><rect x="320" y="36" width="70" height="26" rx="9" fill="#dffbf5"/><text x="355" y="54" text-anchor="middle" fill="#007f6d" font-size="12" font-weight="800" font-family="Arial, sans-serif">{t}</text></svg>"""
         c1.markdown(card_svg, unsafe_allow_html=True)
 
         if c2.button('✕', key=f'cancel-{rid}', help='Cancel reservation', use_container_width=True):
