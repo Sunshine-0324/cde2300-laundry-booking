@@ -118,6 +118,23 @@ div[data-testid="stTextInput"] label p {
 .laundry-cal-available{background:#ffffff;border:2px solid #ff4b4b;color:#111827;font-weight:800;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .laundry-cal-disabled{background:#f0f1f4;color:#a8adb7}
 .laundry-cal-mine{background:#dff7df;border:1px solid #9bd49b;color:#176b2c;font-weight:800}
+
+/* Keep Streamlit calendar button rows in seven columns on phones. */
+@media (max-width: 640px){
+    div[data-testid="stHorizontalBlock"]:has(button[kind="secondary"]) {
+        flex-wrap: nowrap !important;
+        gap: 3px !important;
+    }
+    div[data-testid="stHorizontalBlock"]:has(button[kind="secondary"]) > div[data-testid="stColumn"] {
+        width: calc((100% - 18px)/7) !important;
+        flex: 1 1 calc((100% - 18px)/7) !important;
+        min-width: 0 !important;
+    }
+    div[data-testid="stHorizontalBlock"]:has(button[kind="secondary"]) button {
+        min-height: 38px !important;
+        padding: 0 !important;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -273,33 +290,39 @@ elif page=='date':
         months.append((cursor.year,cursor.month))
         cursor = date(cursor.year+1,1,1) if cursor.month==12 else date(cursor.year,cursor.month+1,1)
 
+    # Render the calendar with real Streamlit buttons so available dates can
+    # be selected directly on both desktop and mobile.
     for year,month in months:
         st.markdown(f'<div style="font-size:17px;font-weight:800;color:#111827;margin:14px 0 8px">{calendar.month_name[month]} {year}</div>',unsafe_allow_html=True)
-        html='<div class="laundry-cal-head">'+''.join(f'<div>{x}</div>' for x in ['Su','Mo','Tu','We','Th','Fr','Sa'])+'</div>'
-        for week in cal.monthdatescalendar(year,month):
-            html+='<div class="laundry-cal-week">'
-            for day_item in week:
-                kd=day_item.isoformat()
-                if day_item.month!=month:
-                    html+='<div class="laundry-cal-empty"></div>'
-                elif kd in my_dates:
-                    html+=f'<div class="laundry-cal-day laundry-cal-mine">✓ {day_item.day}</div>'
-                elif not(window_start<=day_item<=window_end) or kd in unavailable:
-                    html+=f'<div class="laundry-cal-day laundry-cal-disabled">{day_item.day}</div>'
-                else:
-                    html+=f'<div class="laundry-cal-day laundry-cal-available">{day_item.day}</div>'
-            html+='</div>'
-        st.markdown(html,unsafe_allow_html=True)
+        st.markdown('<div class="laundry-cal-head">'+''.join(f'<div>{x}</div>' for x in ['Su','Mo','Tu','We','Th','Fr','Sa'])+'</div>',unsafe_allow_html=True)
 
-    st.markdown('<div style="margin-top:8px;color:#667085;font-size:12px"><b>✓</b> Your reservation · Grey dates are unavailable.</div>',unsafe_allow_html=True)
-    available_days=[d for d in window_days if d.isoformat() not in unavailable]
-    if available_days:
-        selected=st.selectbox('Select an available date',available_days,format_func=lambda x:x.strftime('%a, %d %b %Y'))
-        if st.button('Continue',use_container_width=True,type='primary'):
-            st.session_state.day=selected
-            nav('washer')
-    else:
-        st.info('There are no available booking dates within the next 2 weeks.')
+        for week_no, week in enumerate(cal.monthdatescalendar(year,month)):
+            cols = st.columns(7, gap="small")
+            for idx, day_item in enumerate(week):
+                kd = day_item.isoformat()
+                if day_item.month != month:
+                    cols[idx].markdown('<div style="height:38px"></div>', unsafe_allow_html=True)
+                elif kd in my_dates:
+                    cols[idx].markdown(
+                        f'<div class="laundry-cal-day laundry-cal-mine">✓ {day_item.day}</div>',
+                        unsafe_allow_html=True
+                    )
+                elif not(window_start <= day_item <= window_end) or kd in unavailable:
+                    cols[idx].markdown(
+                        f'<div class="laundry-cal-day laundry-cal-disabled">{day_item.day}</div>',
+                        unsafe_allow_html=True
+                    )
+                else:
+                    if cols[idx].button(
+                        str(day_item.day),
+                        key=f"date-pick-{kd}",
+                        use_container_width=True,
+                        type="secondary"
+                    ):
+                        st.session_state.day = day_item
+                        nav('washer')
+
+    st.markdown('<div style="margin-top:8px;color:#667085;font-size:12px"><b>✓</b> Your reservation · Grey dates are unavailable · Outlined dates are selectable.</div>',unsafe_allow_html=True)
 
 elif page=='washer':
     back('Back','date'); heading('Select a Washer',st.session_state.day.strftime('%A, %d %B %Y'))
