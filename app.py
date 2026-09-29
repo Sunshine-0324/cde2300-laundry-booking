@@ -101,6 +101,14 @@ h1,h2,h3,p{letter-spacing:-.02em}.stMarkdown h2{margin:.2rem 0 .1rem}
     opacity: 1 !important;
     -webkit-text-fill-color: #000000 !important;
 }
+
+/* Make login form labels clearly visible on the light page background. */
+div[data-testid="stTextInput"] label,
+div[data-testid="stTextInput"] label p {
+    color: #111111 !important;
+    opacity: 1 !important;
+    font-weight: 700 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
