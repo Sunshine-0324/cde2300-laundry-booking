@@ -282,7 +282,7 @@ elif page=='date':
                 elif kd in my_dates:
                     html+=f'<div class="laundry-cal-day laundry-cal-mine">✓ {day_item.day}</div>'
                 elif not(window_start<=day_item<=window_end) or kd in unavailable:
-                    html+=f'<div class="laundry-cal-day laundry-cal-disabled">{day_item.day}</div>'
+                    html+=f'<div class="laundry-cal-day laundry-cal-disabled"><span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px"><span>{day_item.day}</span><span style="position:absolute;font-size:25px;font-weight:400;color:#8f96a3;opacity:.75;line-height:1">×</span></span></div>'
                 else:
                     html+=f'<div class="laundry-cal-day">{day_item.day}</div>'
             html+='</div>'
