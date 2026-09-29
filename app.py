@@ -114,7 +114,10 @@ div[data-testid="stTextInput"] label p {
 .laundry-cal-head,.laundry-cal-week{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important;gap:3px!important;width:100%!important}
 .laundry-cal-head div{text-align:center;color:#667085;font-size:12px;font-weight:700;padding:4px 0}
 .laundry-cal-day{min-height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
-.laundry-cal-empty{min-height:40px}.laundry-cal-disabled{background:#f0f1f4;color:#a8adb7}.laundry-cal-mine{background:#dff7df;border:1px solid #9bd49b;color:#176b2c;font-weight:800}
+.laundry-cal-empty{min-height:40px}
+.laundry-cal-available{background:#ffffff;border:2px solid #ff4b4b;color:#111827;font-weight:800;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.laundry-cal-disabled{background:#f0f1f4;color:#a8adb7}
+.laundry-cal-mine{background:#dff7df;border:1px solid #9bd49b;color:#176b2c;font-weight:800}
 </style>
 """, unsafe_allow_html=True)
 
@@ -282,9 +285,9 @@ elif page=='date':
                 elif kd in my_dates:
                     html+=f'<div class="laundry-cal-day laundry-cal-mine">✓ {day_item.day}</div>'
                 elif not(window_start<=day_item<=window_end) or kd in unavailable:
-                    html+=f'<div class="laundry-cal-day laundry-cal-disabled"><span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px"><span>{day_item.day}</span><span style="position:absolute;font-size:25px;font-weight:400;color:#8f96a3;opacity:.75;line-height:1">×</span></span></div>'
+                    html+=f'<div class="laundry-cal-day laundry-cal-disabled">{day_item.day}</div>'
                 else:
-                    html+=f'<div class="laundry-cal-day">{day_item.day}</div>'
+                    html+=f'<div class="laundry-cal-day laundry-cal-available">{day_item.day}</div>'
             html+='</div>'
         st.markdown(html,unsafe_allow_html=True)
 
