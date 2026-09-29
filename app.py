@@ -153,9 +153,9 @@ div[data-testid="stColumn"]:has(.reservation-cancel-marker) div[data-testid="stB
     margin:0 !important;
 }
 div[data-testid="stColumn"]:has(.reservation-cancel-marker) button {
-    width:56px !important;
-    height:56px !important;
-    min-height:56px !important;
+    width:64px !important;
+    height:64px !important;
+    min-height:64px !important;
     padding:0 !important;
     border-radius:12px !important;
     background:#ff4b4b !important;
@@ -181,10 +181,39 @@ div[data-testid="stColumn"]:has(.reservation-cancel-marker) button:hover {
         min-width:0 !important;
     }
     div[data-testid="stHorizontalBlock"]:has(.reservation-cancel-marker) > div[data-testid="stColumn"]:last-child {
-        flex:0 0 56px !important;
-        width:56px !important;
-        min-width:56px !important;
+        flex:0 0 64px !important;
+        width:64px !important;
+        min-width:64px !important;
     }
+}
+
+/* Exact visual alignment for My Reservations rows */
+div[data-testid="stHorizontalBlock"]:has(.reservation-cancel-marker) {
+    align-items:flex-start !important;
+    min-height:64px !important;
+    margin-bottom:14px !important;
+}
+div[data-testid="stHorizontalBlock"]:has(.reservation-cancel-marker) > div[data-testid="stColumn"] {
+    height:64px !important;
+}
+div[data-testid="stHorizontalBlock"]:has(.reservation-cancel-marker) div[data-testid="stMarkdownContainer"] {
+    margin:0 !important;
+    padding:0 !important;
+}
+div[data-testid="stHorizontalBlock"]:has(.reservation-cancel-marker) div[data-testid="stMarkdownContainer"] > p {
+    margin:0 !important;
+    padding:0 !important;
+    line-height:0 !important;
+}
+div[data-testid="stHorizontalBlock"]:has(.reservation-cancel-marker) svg {
+    display:block !important;
+    height:64px !important;
+}
+div[data-testid="stColumn"]:has(.reservation-cancel-marker) div[data-testid="stButton"],
+div[data-testid="stColumn"]:has(.reservation-cancel-marker) div[data-testid="stButton"] > button {
+    height:64px !important;
+    min-height:64px !important;
+    margin:0 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -528,7 +557,7 @@ elif page=='reservations':
 
         # Compact reservation row: wide card + small square cancel button.
         c1, c2 = st.columns([8.5, 1.5], gap="small")
-        card_svg = f"""<svg viewBox="0 0 500 56" width="100%" height="56" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{m}, {date_text}, {t}"><rect x="1" y="1" width="498" height="54" rx="12" fill="#ffffff" stroke="#e4e7ec" stroke-width="1.5"/><text x="18" y="22" fill="#111111" font-size="15" font-weight="800" font-family="Arial, sans-serif">{icon}  {m}</text><text x="18" y="43" fill="#4b5563" font-size="11" font-weight="600" font-family="Arial, sans-serif">{date_text}</text><rect x="410" y="28" width="70" height="22" rx="8" fill="#dffbf5"/><text x="445" y="43" text-anchor="middle" fill="#007f6d" font-size="11" font-weight="800" font-family="Arial, sans-serif">{t}</text></svg>"""
+        card_svg = f"""<svg viewBox="0 0 500 64" width="100%" height="64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{m}, {date_text}, {t}"><rect x="1" y="1" width="498" height="62" rx="12" fill="#ffffff" stroke="#e4e7ec" stroke-width="1.5"/><text x="18" y="25" fill="#111111" font-size="15" font-weight="800" font-family="Arial, sans-serif">{icon}  {m}</text><text x="18" y="49" fill="#4b5563" font-size="11" font-weight="600" font-family="Arial, sans-serif">{date_text}</text><rect x="410" y="34" width="70" height="22" rx="8" fill="#dffbf5"/><text x="445" y="49" text-anchor="middle" fill="#007f6d" font-size="11" font-weight="800" font-family="Arial, sans-serif">{t}</text></svg>"""
         c1.markdown(card_svg, unsafe_allow_html=True)
 
         # A unique marker lets CSS target only this adjacent cancel button.
