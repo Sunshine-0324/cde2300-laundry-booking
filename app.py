@@ -138,6 +138,11 @@ div[data-testid="stTextInput"] label p {
 
 .laundry-cal-link{text-decoration:none!important;box-sizing:border-box;cursor:pointer}
 .laundry-cal-link:hover{background:#fff5f5!important}
+
+/* Cleaner reservation cards/buttons on phones */
+@media (max-width:640px){
+    div[data-testid="stButton"] > button[kind="secondary"]{min-height:40px}
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -478,12 +483,12 @@ elif page=='reservations':
         icon = '▣' if typ == 'Washer' else '♨'
         date_text = datetime.fromisoformat(d).strftime("%d %b %Y")
 
-        c1, c2 = st.columns([4.2, 1])
+        # Full-width card first, then a compact full-width cancel button.
+        # This avoids Streamlit columns becoming awkwardly separated on phones.
+        card_svg = f"""<svg viewBox="0 0 410 96" width="100%" height="96" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{m}, {date_text}, {t}"><rect x="1" y="1" width="408" height="94" rx="16" fill="#ffffff" stroke="#e4e7ec" stroke-width="1.5"/><text x="20" y="34" fill="#111111" font-size="17" font-weight="800" font-family="Arial, sans-serif">{icon}  {m}</text><text x="20" y="70" fill="#4b5563" font-size="13" font-weight="600" font-family="Arial, sans-serif">{date_text}</text><rect x="316" y="49" width="72" height="32" rx="10" fill="#dffbf5"/><text x="352" y="70" text-anchor="middle" fill="#007f6d" font-size="13" font-weight="800" font-family="Arial, sans-serif">{t}</text></svg>"""
+        st.markdown(card_svg, unsafe_allow_html=True)
 
-        card_svg = f"""<svg viewBox="0 0 410 112" width="100%" height="112" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{m}, {date_text}, {t}"><rect x="1" y="1" width="408" height="110" rx="20" fill="#ffffff" stroke="#e4e7ec" stroke-width="1.5"/><text x="22" y="39" fill="#111111" font-size="18" font-weight="800" font-family="Arial, sans-serif">{icon}  {m}</text><text x="22" y="82" fill="#4b5563" font-size="14" font-weight="600" font-family="Arial, sans-serif">{date_text}</text><rect x="310" y="58" width="78" height="38" rx="12" fill="#dffbf5"/><text x="349" y="82" text-anchor="middle" fill="#007f6d" font-size="14" font-weight="800" font-family="Arial, sans-serif">{t}</text></svg>"""
-        c1.markdown(card_svg, unsafe_allow_html=True)
-
-        if c2.button('Cancel', key=f'cancel-{rid}'):
+        if st.button('Cancel reservation', key=f'cancel-{rid}', use_container_width=True):
             rest_delete(
                 'reservations',
                 {
